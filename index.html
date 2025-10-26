@@ -105,7 +105,8 @@
 
     <select id="typ_drewna" required>
         <option value="">Wybierz typ drewna...</option>
-        <option value="surowa" selected>Surowa (1400 zł/m³)</option> <option value="suszona">Suszona (1700 zł/m³)</option>
+        <option value="surowa" selected>Surowa (1400 zł/m³)</option>
+        <option value="suszona">Suszona (1700 zł/m³)</option>
         <option value="suszona_strugana">Suszona + Strugana (2000 zł/m³)</option>
     </select>
 
@@ -124,7 +125,9 @@
             <tr>
                 <th>Element (Typ)</th>
                 <th>Obj. SUMA (m³)</th>
-                <th>Koszt Bazowy (Netto)</th> <th>Koszt SUMA (Brutto)</th> <th></th>
+                <th>Koszt Bazowy (Netto)</th>
+                <th>Koszt SUMA (Brutto)</th>
+                <th></th>
             </tr>
         </thead>
         <tbody id="lista-materialow">
@@ -132,7 +135,10 @@
         <tfoot>
             <tr class="total-row">
                 <td>SUMA CAŁKOWITA:</td>
-                <td id="suma-objetosc">0.00 m³</td> <td id="suma-netto">0.00 zł</td>   <td id="suma-brutto">0.00 zł</td> <td></td>
+                <td id="suma-objetosc">0.00 m³</td>
+                <td id="suma-netto">0.00 zł</td>
+                <td id="suma-brutto">0.00 zł</td>
+                <td></td>
             </tr>
         </tfoot>
     </table>
@@ -159,7 +165,6 @@
     // --- SKRYPT JAVASCRIPT ---
 
     // Stałe i Cennik 
-    // const WSPOLCZYNNIK_1450 = 1450; // <-- POPRAWKA: Ta stała była błędem i została usunięta.
     const WSPOLCZYNNIK_1_23 = 1.23;
     const CENNIK = {
         'surowa': 1400,
@@ -167,7 +172,7 @@
         'suszona_strugana': 2000
     };
 
-    let materialy = [];
+    let materialy = []; // Globalna tablica materiałów (pusta na starcie)
 
     // --- FUNKCJE POMOCNICZE (NA GÓRZE) ---
 
@@ -178,30 +183,29 @@
     function obliczSumeCalkowita() {
         let sumaKosztowBrutto = 0;
         let sumaKosztowNetto = 0;
-        let sumaObjetosci = 0; // <-- POPRAWKA: Dodano sumę objętości
+        let sumaObjetosci = 0; 
 
         materialy.forEach(material => {
             const cena_m3 = pobierzCeneM3(material.typ); 
             const objetosc_sztuka = (material.przekrojA / 100) * (material.przekrojB / 100) * material.dlugosc;
             const objetosc_suma = objetosc_sztuka * material.ilosc_sztuk;
-            const kosztPodstawowy_suma = objetosc_suma * cena_m3; // To jest koszt Netto
+            const kosztPodstawowy_suma = objetosc_suma * cena_m3; 
 
-            sumaObjetosci += objetosc_suma; // <-- POPRAWKA
-            sumaKosztowNetto += kosztPodstawowy_suma; // <-- POPRAWKA: Sumujemy koszt bazowy (netto)
-            sumaKosztowBrutto += kosztPodstawowy_suma * WSPOLCZYNNIK_1_23; // <-- POPRAWKA: Zmiana nazwy zmiennej
+            sumaObjetosci += objetosc_suma; 
+            sumaKosztowNetto += kosztPodstawowy_suma; 
+            sumaKosztowBrutto += kosztPodstawowy_suma * WSPOLCZYNNIK_1_23; 
         });
 
-        const sumaObjElem = document.getElementById('suma-objetosc'); // <-- POPRAWKA
-        const sumaNettoElem = document.getElementById('suma-netto'); // <-- POPRAWKA
-        const sumaBruttoElem = document.getElementById('suma-brutto'); // <-- POPRAWKA
+        const sumaObjElem = document.getElementById('suma-objetosc'); 
+        const sumaNettoElem = document.getElementById('suma-netto'); 
+        const sumaBruttoElem = document.getElementById('suma-brutto'); 
 
-        if (sumaObjElem) sumaObjElem.textContent = sumaObjetosci.toFixed(4) + ' m³'; // <-- POPRAWKA
-        if (sumaNettoElem) sumaNettoElem.textContent = sumaKosztowNetto.toFixed(2) + ' zł'; // <-- POPRAWKA
-        if (sumaBruttoElem) sumaBruttoElem.textContent = sumaKosztowBrutto.toFixed(2) + ' zł'; // <-- POPRAWKA
+        if (sumaObjElem) sumaObjElem.textContent = sumaObjetosci.toFixed(4) + ' m³'; 
+        if (sumaNettoElem) sumaNettoElem.textContent = sumaKosztowNetto.toFixed(2) + ' zł'; 
+        if (sumaBruttoElem) sumaBruttoElem.textContent = sumaKosztowBrutto.toFixed(2) + ' zł'; 
     }
 
     function wyswietlPodsumowanieLogistyki() {
-        // ... (bez zmian)
         const logistyka = {
             miejsce: document.getElementById('miejsce_dostawy').value || '---',
             telefon: document.getElementById('numer_telefonu').value || '---',
@@ -220,9 +224,9 @@
     }
 
     // --- FUNKCJE OBSŁUGI DANYCH (ZAPIS/WCZYTYWANIE) ---
+    // Te funkcje teraz zapisują tylko do localStorage, ale dane NIE SĄ WCZYTYWANE przy starcie.
 
     function zapiszLogistyke() {
-        // ... (bez zmian)
         const logistyka = {
             miejsce: document.getElementById('miejsce_dostawy').value,
             telefon: document.getElementById('numer_telefonu').value,
@@ -230,15 +234,16 @@
             godzina: document.getElementById('godzina_dostawy').value
         };
         try {
+            // Zapisujemy, ale nie będziemy tego wczytywać przy starcie strony
             localStorage.setItem('materialyLogistyka', JSON.stringify(logistyka));
         } catch (e) {
             console.error("Błąd zapisu logistyki.", e);
         }
-        wyswietlPodsumowanieLogistyki(); 
+        wyswietlPodsumowanieLogistyki(); // Aktualizuj podgląd po zapisie
     }
 
+    // Ta funkcja nie jest już potrzebna do wczytywania przy starcie, ale zostawiam
     function wczytajLogistyke() {
-        // ... (bez zmian)
         try {
             const zapisanaLogistyka = localStorage.getItem('materialyLogistyka');
             if (zapisanaLogistyka) {
@@ -254,8 +259,8 @@
     }
 
     function zapiszMaterialy() {
-        // ... (bez zmian)
         try {
+             // Zapisujemy, ale nie będziemy tego wczytywać przy starcie strony
             localStorage.setItem('materialyWycenaKanty', JSON.stringify(materialy));
         } catch (e) {
             console.error("BŁĄD ZAPISU! Nie udało się zapisać zamówienia do pamięci.", e);
@@ -265,17 +270,16 @@
     // --- FUNKCJE OBSŁUGI ZAMÓWIENIA (ADD/REMOVE/REFRESH) ---
 
     function usunMaterial(index) {
-        // ... (bez zmian)
         materialy.splice(index, 1); 
-        zapiszMaterialy();
-        zapiszLogistyke(); 
-        odswiezTabele();
+        zapiszMaterialy(); // Zapisz zmiany w localStorage (na wszelki wypadek)
+        odswiezTabele(); // Odśwież widok
     }
 
     function odswiezTabele() {
         const lista = document.getElementById('lista-materialow');
-        lista.innerHTML = ''; 
+        lista.innerHTML = ''; // Wyczyść tabelę
 
+        // Narysuj tabelę od nowa na podstawie globalnej tablicy 'materialy'
         materialy.forEach((material, index) => {
             if (!material || !material.typ) { 
                 return; 
@@ -285,9 +289,8 @@
             const objetosc_sztuka = (material.przekrojA / 100) * (material.przekrojB / 100) * material.dlugosc;
             const objetosc_suma = objetosc_sztuka * material.ilosc_sztuk;
             
-            const kosztPodstawowy_suma = objetosc_suma * cena_m3; // <-- Koszt Netto
-            // const wynikMnoznik_suma = objetosc_suma * WSPOLCZYNNIK_1450; // <-- POPRAWKA: Usunięto
-            const kosztFinalny_suma = kosztPodstawowy_suma * WSPOLCZYNNIK_1_23; // <-- Koszt Brutto
+            const kosztPodstawowy_suma = objetosc_suma * cena_m3; 
+            const kosztFinalny_suma = kosztPodstawowy_suma * WSPOLCZYNNIK_1_23; 
 
             const wiersz = lista.insertRow();
 
@@ -296,8 +299,167 @@
             wiersz.insertCell(0).textContent = opis;
 
             wiersz.insertCell(1).textContent = objetosc_suma.toFixed(4); 
-            wiersz.insertCell(2).textContent = kosztPodstawowy_suma.toFixed(2) + ' zł'; // <-- POPRAWKA: Wyświetlamy koszt Netto
-            wiersz.insertCell(3).textContent = kosztFinalny_suma.toFixed(2) + ' zł'; // <-- To jest koszt Brutto
+            wiersz.insertCell(2).textContent = kosztPodstawowy_suma.toFixed(2) + ' zł'; 
+            wiersz.insertCell(3).textContent = kosztFinalny_suma.toFixed(2) + ' zł'; 
 
             const przyciskKomorka = wiersz.insertCell(4);
-            const przycisk = document.createElement('
+            const przycisk = document.createElement('button');
+            przycisk.textContent = 'Usuń';
+            przycisk.className = 'delete-btn';
+            przycisk.onclick = () => usunMaterial(index); 
+            przyciskKomorka.appendChild(przycisk);
+        });
+
+        obliczSumeCalkowita(); // Przelicz sumy na dole
+    }
+
+    function dodajMaterial() {
+        const typ = document.getElementById('typ_drewna').value;
+        const przekrojA = parseFloat(document.getElementById('przekrojA').value);
+        const przekrojB = parseFloat(document.getElementById('przekrojB').value);
+        const dlugosc = parseFloat(document.getElementById('dlugosc').value);
+        const ilosc_sztuk = parseInt(document.getElementById('ilosc_sztuk').value); 
+
+        // Walidacja
+        if (typ === '' || isNaN(przekrojA) || przekrojA <= 0 || isNaN(przekrojB) || przekrojB <= 0 || isNaN(dlugosc) || dlugosc <= 0 || isNaN(ilosc_sztuk) || ilosc_sztuk <= 0) {
+            alert('Proszę wypełnić wszystkie wymagane pola (typ, wymiary, ilość) poprawnymi wartościami.');
+            return;
+        }
+
+        const nowaKantowka = {
+            typ: typ, 
+            przekrojA: przekrojA,
+            przekrojB: przekrojB,
+            dlugosc: dlugosc,
+            ilosc_sztuk: ilosc_sztuk
+        };
+
+        materialy.push(nowaKantowka); // Dodaj do globalnej tablicy
+
+        zapiszMaterialy(); // Zapisz w localStorage (na wszelki wypadek)
+        odswiezTabele(); // <-- NAJWAŻNIEJSZE: Przerenderuj tabelę z nowym elementem
+
+        // Wyczyść pola formularza po dodaniu
+        // document.getElementById('typ_drewna').value = 'surowa'; // Pozostaw wybrany typ
+        document.getElementById('przekrojA').value = '';
+        document.getElementById('przekrojB').value = '';
+        document.getElementById('dlugosc').value = '';
+        document.getElementById('ilosc_sztuk').value = '';
+    }
+
+    // --- FUNKCJA GENERUJĄCA CSV ---
+    function eksportujDoCSV() {
+        if (materialy.length === 0) {
+            alert("Zamówienie jest puste. Nie ma co eksportować.");
+            return;
+        }
+
+        const logistyka = {
+            miejsce: document.getElementById('miejsce_dostawy').value || 'BRAK DANYCH',
+            telefon: document.getElementById('numer_telefonu').value || 'BRAK DANYCH',
+            dzien: document.getElementById('dzien_dostawy').value || 'BRAK DANYCH',
+            godzina: document.getElementById('godzina_dostawy').value || 'BRAK DANYCH'
+        };
+
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+
+        csvContent += "Dane Logistyczne\r\n";
+        csvContent += "Miejsce Dostawy;" + logistyka.miejsce + "\r\n";
+        csvContent += "Numer Telefonu;" + logistyka.telefon + "\r\n";
+        csvContent += "Dzień Dostawy;" + logistyka.dzien + "\r\n";
+        csvContent += "Godzina Dostawy;" + logistyka.godzina + "\r\n";
+        csvContent += "\r\n"; 
+
+        csvContent += "ELEMENT;PRZEKRÓJ A (cm);PRZEKRÓJ B (cm);DŁUGOŚĆ (m);ILOŚĆ SZTUK\r\n";
+
+        materialy.forEach(material => {
+
+            const typ_display = material.typ.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+            let row = [
+                typ_display, 
+                material.przekrojA.toFixed(1).replace('.', ','), 
+                material.przekrojB.toFixed(1).replace('.', ','),
+                material.dlugosc.toFixed(2).replace('.', ','), 
+                material.ilosc_sztuk, 
+            ];
+
+            csvContent += row.join(";") + "\r\n"; 
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+
+        const nazwaPliku = logistyka.miejsce.replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '_') || 'Brak_Adresu'; 
+        const dzisiaj = new Date().toISOString().slice(0, 10);
+        link.setAttribute("download", `Zamowienie_${nazwaPliku}_${dzisiaj}.csv`);
+
+        document.body.appendChild(link); 
+        link.click(); 
+        document.body.removeChild(link);
+    }
+
+    // --- FUNKCJA INICJALIZUJĄCA APLIKACJĘ ---
+
+    function aktywujZapisLogistyki() {
+        const polaLogistyczne = [
+            document.getElementById('miejsce_dostawy'),
+            document.getElementById('numer_telefonu'),
+            document.getElementById('dzien_dostawy'),
+            document.getElementById('godzina_dostawy')
+        ];
+
+        polaLogistyczne.forEach(pole => {
+            if (pole) {
+                pole.addEventListener('input', () => {
+                    zapiszLogistyke(); // Ta funkcja zawiera już wyswietlPodsumowanieLogistyki()
+                });
+            }
+        });
+    }
+
+    // Ta funkcja czyści wszystko przy starcie
+    function wczytajMaterialyBezpiecznie() {
+        // 1. Wyczyść logistykę z localStorage (zgodnie z życzeniem)
+        localStorage.removeItem('materialyLogistyka');
+        
+        // 2. Wyczyść materiały z localStorage (zgodnie z życzeniem)
+        localStorage.removeItem('materialyWycenaKanty'); 
+        
+        // 3. Ustaw globalną tablicę na pustą
+        materialy = []; 
+
+        // 4. Wyczyść pola formularza logistyki
+        document.getElementById('miejsce_dostawy').value = '';
+        document.getElementById('numer_telefonu').value = '';
+        document.getElementById('dzien_dostawy').value = '';
+        document.getElementById('godzina_dostawy').value = '';
+        
+        // 5. Ustaw domyślny typ drewna
+        document.getElementById('typ_drewna').value = 'surowa';
+
+        // 6. Odśwież widoki (pokaż puste dane)
+        wyswietlPodsumowanieLogistyki(); 
+        odswiezTabele(); // To teraz wyświetli pustą tabelę
+    }
+
+    function inicjalizujAplikacje() {
+        // Inicjalizacja danych (czyści wszystko przy starcie)
+        wczytajMaterialyBezpiecznie(); 
+        aktywujZapisLogistyki(); // Aktywuj zapis logistyki (bez wczytywania)
+
+        // Przypisanie zdarzeń do przycisków
+        const dodajBtn = document.getElementById('dodaj-material-btn');
+        const eksportBtn = document.getElementById('export-btn');
+
+        if (dodajBtn) dodajBtn.addEventListener('click', dodajMaterial);
+        if (eksportBtn) eksportBtn.addEventListener('click', eksportujDoCSV);
+    }
+
+    // Uruchamiamy inicjalizację po załadowaniu całego DOM
+    document.addEventListener('DOMContentLoaded', inicjalizujAplikacje);
+</script>
+
+</body>
+</html>
